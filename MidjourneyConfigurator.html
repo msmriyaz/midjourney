@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet"> 
+  <style>
+    * {
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+
+  h2 {
+  color: #444;
+  text-align: left; /* changed from center to left */
+  padding: 20px 0;
+}
+
+  form {
+position: relative;  
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  label {
+    display: block;
+    margin-top: 20px;
+  }
+
+  label[for="style"] {
+    display: inline-block;
+  }
+
+  input[type="checkbox"] {
+    display: inline-block;
+    vertical-align: middle; /* Align checkbox with the label */
+  }
+  
+  .radio-group {
+  display: inline-block;
+  margin-right: 30px; /* Or any spacing you prefer */
+}
+
+.radio-group input[type="radio"] {
+  display: inline-block;
+  vertical-align: middle; /* Align radio with the label */
+}
+
+.radio-group label {
+  display: inline-block;
+}
+
+#copy {
+  position: absolute;
+  background-color: #0D6EFD;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px
+}
+
+
+    textarea {
+      resize: none;
+    }
+
+    @media screen and (max-width: 600px) {
+      form {
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<form>
+<h2>Midjourney Artistry Configurator</h2>
+<label for="model">Model:</label><br>
+  <select id="model" name="model">
+    <option value="5">5</option>
+    <option value="5.1">5.1</option>
+    <option value="niji">Niji</option>
+  </select><br>
+
+  <label for="chaos">Chaos:</label><br>
+  <input type="range" id="chaos" name="chaos" min="0" max="100" value="0"><br>
+
+
+  <label>Orientation:</label>
+<div class="radio-group">
+  <input type="radio" id="landscape" name="orientation" value="landscape" checked>
+  <label for="landscape">Landscape</label>
+</div>
+<div class="radio-group">
+  <input type="radio" id="portrait" name="orientation" value="portrait">
+  <label for="portrait">Portrait</label>
+</div>
+
+  <label for="aspectratio">Aspect Ratio:</label><br>
+  <select id="aspectratio" name="aspectratio">
+    <option value="1:1">1:1</option>
+    <option value="4:3">4:3</option>
+    <option value="3:2">3:2</option>
+    <option value="16:9">16:9</option>
+    <option value="1.85:1">1.85:1</option>
+    <option value="2.39:1">2.39:1</option>
+  </select><br>
+
+  <label for="stylize">Stylize:</label><br>
+  <input type="range" id="stylize" name="stylize" min="0" max="1000" value="100"><br>
+
+  <label for="quality">Quality:</label><br>
+  <input type="range" id="quality" name="quality" min="0.25" max="1" step="0.25" value="1"><br>
+  
+  <label for="style">Style:</label><br>
+  <input type="checkbox" id="style" name="style">
+  <label for="style">Raw</label><br><br>
+  
+  <textarea id="output" rows="4" cols="50">
+--v 5 --chaos 0 --ar 1:1 --s 100 --q 1
+</textarea><br>
+<button id="copy">Copy to Clipboard</button>
+  
+</form> 
+
+
+
+<script>
+  const formElements = document.querySelectorAll('input, select');
+  const output = document.getElementById('output');
+
+  function updateAspectRatioOptions() {
+    let orientation = document.querySelector('input[name="orientation"]:checked').value;
+    let aspectRatioSelect = document.getElementById('aspectratio');
+
+    let aspectRatios = {
+      '1:1': '1:1',
+      '4:3': '3:4',
+      '3:2': '2:3',
+      '16:9': '9:16',
+      '1.85:1': '1:1.85',
+      '2.39:1': '1:2.39'
+    };
+
+    // Save the current selection
+    let currentSelection = aspectRatioSelect.value;
+    
+    let options = '';
+    for (let aspectRatio in aspectRatios) {
+      let value = orientation === 'landscape' ? aspectRatio : aspectRatios[aspectRatio];
+      options += `<option value="${value}">${value}</option>`;
+    }
+
+    aspectRatioSelect.innerHTML = options;
+
+    // Restore the selection
+    if (Array.from(aspectRatioSelect.options).some(option => option.value === currentSelection)) {
+      aspectRatioSelect.value = currentSelection;
+    }
+  }
+
+  formElements.forEach(el => {
+    el.addEventListener('change', () => {
+      updateAspectRatioOptions();
+
+      let model = document.getElementById('model').value;
+      let chaos = document.getElementById('chaos').value;
+      let style = document.getElementById('style').checked ? 'raw' : '';
+      let aspectratio = document.getElementById('aspectratio').value;
+      let stylize = document.getElementById('stylize').value;
+      let quality = document.getElementById('quality').value;
+
+      output.value = `--v ${model} --chaos ${chaos} ${style ? '--style ' + style : ''} --ar ${aspectratio} --s ${stylize} --q ${quality}`;
+    });
+  });
+
+  updateAspectRatioOptions();
+  
+  document.getElementById('copy').addEventListener('click', function() {
+  /* Get the text field */
+  let copyText = document.getElementById('output');
+
+  /* Select the text field */
+  copyText.select();
+  copyText.setSelectionRange(0, 99999); /* For mobile devices */
+
+  /* Copy the text inside the text field */
+  document.execCommand('copy');
+
+  /* Alert the copied text */
+  //alert('Copied the text: ' + copyText.value);
+});
+
+</script>
+
+</body>
+</html>
